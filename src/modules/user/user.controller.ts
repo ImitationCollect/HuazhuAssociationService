@@ -1,17 +1,39 @@
-import { Controller, Get, Response } from '@nestjs/common';
+import { Controller, Get, Response, Param, Body, Post, Delete, Query, Put } from '@nestjs/common';
+import { ApiOperation } from '@nestjs/swagger';
 import { UserService } from './user.service';
+import { CreateUserDto, EditUserDto, QueryUserDto } from './user.dto';
 
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) {}
+    @Post('create')
+    @ApiOperation({ summary: '创建用户' })
+    createUser(@Body() createUserDto: CreateUserDto) {
+        return this.userService.createUser(createUserDto);
+    }
 
-    @Get()
-    getHello(): string {
-        return this.userService.getHello();
+    @Put('edit')
+    @ApiOperation({ summary: '编辑用户' })
+    editUser(@Body() editUserDto: EditUserDto) {
+        return this.userService.editUser(editUserDto);
     }
 
     @Get('list')
-    getUsers(): any {
-        return this.userService.getUsers();
+    @ApiOperation({ summary: '查询用户列表' })
+    getUserList(@Query() queryUserDto: QueryUserDto) {
+        return this.userService.getUserList(queryUserDto);
+    }
+
+    @Get('detail/:userId')
+    @ApiOperation({ summary: '查询用户详情' })
+    getUserDetail(@Param('userId') userId: number | string) {
+        return this.userService.getUserDetail({ userId });
+    }
+
+    @Delete('delete/:userId')
+    @ApiOperation({ summary: '删除用户' })
+    deleteUser(@Param('userId') userId: number | string) {
+        const userIds = userId.toString().split(',');
+        return this.userService.deleteUser(userIds);
     }
 }
