@@ -9,10 +9,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
         const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-        const exceptionStr = exception ? `message:${exception['message']},stack:${exception['stack']}` : '';
-
         // 设置错误信息
         const message = exception['message'] ? exception['message'] : `${status >= 500 ? 'Service Error' : 'Client Error'}`;
+        const exceptionStr = exception ? `message:${message},stack:${exception['stack']}` : '';
 
         // 记录日志
         console.log('全局异常日志： %s %s %s error: %s', request.method, request.url, request.body, exceptionStr);

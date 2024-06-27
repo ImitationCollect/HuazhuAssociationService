@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { PageService } from '../services';
 
@@ -12,12 +12,23 @@ export class UserService {
     ) {}
 
     async createUser(params) {
-        return this.userRepository.insert(params);
+        const find = await this.getUserDetail({ phoneNumber: params?.phoneNumber });
+        if (!find) {
+            const createInfo = await this.userRepository.insert(params);
+            return createInfo?.identifiers ? createInfo?.identifiers[0] : null;
+        } else {
+            throw new BadRequestException('该手机号已注册');
+        }
     }
 
     async editUser(params) {
-        this.userRepository.update(params.userId, params);
-        return { message: '更新成功' };
+        const find = await this.getUserDetail({ userId: params?.userId });
+        if (find) {
+            await this.userRepository.update(params.userId, params);
+            return this.getUserDetail({ userId: params?.userId });
+        } else {
+            throw new BadRequestException('userId不存在');
+        }
     }
 
     async getUserList(params) {
@@ -27,7 +38,7 @@ export class UserService {
             querySqlOptions: {
                 order: { updateTime: 'DESC' }
             },
-            likeKeys: ['userName', 'phoneNumber', 'createTime', 'IDNumber']
+            likeKeys: ['userName', 'phoneNumber', 'createTime', 'IDNumber', 'updateTime']
         });
         return result;
     }
@@ -37,6 +48,8 @@ export class UserService {
     }
 
     async deleteUser(id) {
-        return this.userRepository.delete(id);
+        const userIds = id.toString().split(',');
+        await this.userRepository.delete(userIds);
+        return null;
     }
 }

@@ -36,8 +36,8 @@ switch (process.env.RUNNING_ENV) {
                     database: config.get('DB_DATABASE'),
                     username: config.get('DB_USERNAME'),
                     password: config.get('DB_PASSWORD'),
-                    logging: config.get('DB_LOGGING'),
-                    synchronize: config.get('DB_SYNC'),
+                    logging: ['query', 'error'],
+                    synchronize: true, // HACK:开启时更新Entity中的字段会清空数据库数据
                     autoLoadEntities: true
                 };
             }

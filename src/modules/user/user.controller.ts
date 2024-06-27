@@ -1,4 +1,4 @@
-import { Controller, Get, Response, Param, Body, Post, Delete, Query, Put } from '@nestjs/common';
+import { Controller, Get, Param, Body, Post, Delete, Put } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CreateUserDto, EditUserDto, QueryUserDto } from './user.dto';
@@ -18,9 +18,9 @@ export class UserController {
         return this.userService.editUser(editUserDto);
     }
 
-    @Get('list')
+    @Post('list')
     @ApiOperation({ summary: '查询用户列表' })
-    getUserList(@Query() queryUserDto: QueryUserDto) {
+    getUserList(@Body() queryUserDto: QueryUserDto) {
         return this.userService.getUserList(queryUserDto);
     }
 
@@ -33,7 +33,6 @@ export class UserController {
     @Delete('delete/:userId')
     @ApiOperation({ summary: '删除用户' })
     deleteUser(@Param('userId') userId: number | string) {
-        const userIds = userId.toString().split(',');
-        return this.userService.deleteUser(userIds);
+        return this.userService.deleteUser(userId);
     }
 }
