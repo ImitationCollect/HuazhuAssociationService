@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, Unique, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Exclude, Expose } from 'class-transformer';
-import { Utils } from '../../utils/utils';
+import { Utils } from '@/utils/utils';
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
@@ -16,7 +16,10 @@ export class User {
     @Column({ type: 'varchar', length: 18, comment: '身份证号', nullable: true })
     @Unique(['IDNumber'])
     @Exclude() // IDNumber不返回给客户端
-    IDNumber;
+    IDNumber: string;
+
+    @Column({ type: 'int', comment: '鉴权类型:1[手机验证码] 2[手机号+密码] 3[微信]', nullable: true })
+    authType: number;
 
     @CreateDateColumn({ comment: '创建时间' })
     createTime: Date;

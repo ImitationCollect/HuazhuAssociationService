@@ -1,7 +1,6 @@
-import { UserService } from './user/user.service';
-import { Repository, Like } from 'typeorm';
+import { Like } from 'typeorm';
 
-export class PageResult<T> {
+export class PaginationResult<T> {
     total: number;
     pageSize: number;
     page: number;
@@ -11,7 +10,7 @@ export class PageResult<T> {
 }
 
 // 分页查询
-export class PageService<T> {
+export class PaginationService<T> {
     constructor(private repository: any) {}
 
     /**
@@ -23,7 +22,7 @@ export class PageService<T> {
      * @param other 客户端输入的查询字段内容
      * @returns
      */
-    async paginate(params: { page: number; pageSize: number; querySqlOptions?: any; likeKeys?: string[] }): Promise<PageResult<T>> {
+    async paginate(params: { page: number; pageSize: number; querySqlOptions?: any; likeKeys?: string[] }): Promise<PaginationResult<T>> {
         const { page = 1, pageSize = 10, querySqlOptions = {}, likeKeys = [], ...other } = params;
 
         const queryFilter = Object.keys(other).map(item => {
@@ -38,16 +37,14 @@ export class PageService<T> {
             where: queryFilter
         });
 
-        const pageResult = new PageResult<T>();
-        pageResult.list = result;
-        pageResult.total = total;
-        pageResult.pageSize = pageSize;
-        pageResult.page = page;
-        pageResult.totalPage = Math.ceil(total / pageSize);
-        pageResult.isEnd = pageResult.totalPage === page;
+        const paginationResult = new PaginationResult<T>();
+        paginationResult.list = result;
+        paginationResult.total = total;
+        paginationResult.pageSize = pageSize;
+        paginationResult.page = page;
+        paginationResult.totalPage = Math.ceil(total / pageSize);
+        paginationResult.isEnd = paginationResult.totalPage === page;
 
-        return pageResult;
+        return paginationResult;
     }
 }
-
-export default [UserService, PageService];

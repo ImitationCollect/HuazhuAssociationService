@@ -36,3 +36,8 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## 支持的功能
+
+### 已完成
+
+### TODO

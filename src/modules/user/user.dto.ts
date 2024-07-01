@@ -1,11 +1,36 @@
-import { IsNotEmpty, IsNumber, IsString, Matches } from 'class-validator';
-import { Utils } from '../../utils/utils';
-import { phoneReg, IDCardReg18 } from '../../constants';
+import { IsNotEmpty, IsNumber, IsString, Matches, isNotEmpty } from 'class-validator';
+import { Utils } from '@/utils/utils';
+import { PHONE_REG, ID_CARD_REG18, PASSWORD_REG, AUTH_TYPE_ENUM } from '@/constants';
+import { BaseQueryDto } from '@/common/dtos/base-query.dto';
+
 export class CreateUserDto {
+    @IsNotEmpty({ message: 'authType不能为空' })
+    authType: number = AUTH_TYPE_ENUM.USERNAME_PWD;
+}
+export class PhoneCodeRegisterDto extends CreateUserDto {
     @IsNotEmpty({ message: 'phoneNumber不能为空' })
     @IsString()
-    @Matches(phoneReg, { message: 'phoneNumber格式错误' })
+    @Matches(PHONE_REG, { message: 'phoneNumber格式错误' })
     phoneNumber: string;
+
+    @IsNotEmpty({ message: 'code不能为空' })
+    @IsNumber()
+    code: number;
+}
+
+export class UsernameRegisterDto extends CreateUserDto {
+    @IsNotEmpty({ message: 'userName不能为空' })
+    @IsString()
+    @Matches(PHONE_REG, { message: 'userName格式错误' })
+    userName: string;
+
+    @IsNotEmpty({ message: 'password不能为空' })
+    @IsString()
+    @Matches(PASSWORD_REG, { message: 'password格式错误' })
+    password: number;
+
+    @IsNotEmpty({ message: 'authType不能为空' })
+    authType: number = AUTH_TYPE_ENUM.USERNAME_PWD;
 }
 
 export class EditUserDto {
@@ -19,23 +44,13 @@ export class EditUserDto {
 
     @IsNotEmpty({ message: 'phoneNumber不能为空' })
     @IsString()
-    @Matches(phoneReg, { message: 'phoneNumber格式错误' })
+    @Matches(PHONE_REG, { message: 'phoneNumber格式错误' })
     phoneNumber: string;
 
     @IsNotEmpty({ message: 'IDNumber不能为空' })
     @IsString()
-    @Matches(IDCardReg18, { message: 'IDNumber格式错误' })
+    @Matches(ID_CARD_REG18, { message: 'IDNumber格式错误' })
     IDNumber: string;
-}
-
-export class BaseQueryDto {
-    @IsNotEmpty({ message: 'page不能为空' })
-    @IsNumber()
-    page: number;
-
-    @IsNotEmpty({ message: 'pageSize不能为空' })
-    @IsNumber()
-    pageSize: number;
 }
 
 export class QueryUserDto extends BaseQueryDto {

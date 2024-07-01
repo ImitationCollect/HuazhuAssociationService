@@ -2,7 +2,9 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
-import { PageService } from '../services';
+import { PaginationService } from '@/common/services/pagination.service';
+import { validate } from '@/utils/validation/validate';
+import { PhoneCodeRegisterDto, UsernameRegisterDto } from './user.dto';
 
 @Injectable()
 export class UserService {
@@ -11,28 +13,63 @@ export class UserService {
         private userRepository: Repository<User>
     ) {}
 
+    /**
+     * 用户名密码创建用户
+     * @param params
+     * @returns
+     */
     async createUser(params) {
-        const find = await this.getUserDetail({ phoneNumber: params?.phoneNumber });
+        await validate(UsernameRegisterDto, params);
+
+        const { userName } = params || {};
+        const find = await this.userRepository.findOne({ where: { phoneNumber: userName } });
         if (!find) {
-            const createInfo = await this.userRepository.insert(params);
-            return createInfo?.identifiers ? createInfo?.identifiers[0] : null;
+            // TODO:密码加解密
+            return this.userRepository.save(params);
         } else {
             throw new BadRequestException('该手机号已注册');
         }
     }
 
+    /**
+     * 手机号 验证码 注册账户
+     * @param params
+     * @returns
+     */
+    async phoneCodeRegister(params) {
+        await validate(PhoneCodeRegisterDto, params);
+        const { phoneNumber } = params || {};
+        const find = await this.userRepository.findOne({ where: { phoneNumber } });
+        if (!find) {
+            return this.userRepository.save(params);
+        } else {
+            throw new BadRequestException('该手机号已注册');
+        }
+    }
+
+    /**
+     * 编辑用户信息
+     * @param params
+     * @returns
+     */
     async editUser(params) {
-        const find = await this.getUserDetail({ userId: params?.userId });
+        const { userId } = params || {};
+        const find = await this.getUserDetail({ userId });
         if (find) {
             await this.userRepository.update(params.userId, params);
-            return this.getUserDetail({ userId: params?.userId });
+            return this.getUserDetail({ userId });
         } else {
             throw new BadRequestException('userId不存在');
         }
     }
 
+    /**
+     * 分页查询用户列表
+     * @param params
+     * @returns
+     */
     async getUserList(params) {
-        const pageService = new PageService(this.userRepository);
+        const pageService = new PaginationService(this.userRepository);
         const result = await pageService.paginate({
             ...params,
             querySqlOptions: {
@@ -43,10 +80,20 @@ export class UserService {
         return result;
     }
 
+    /**
+     * 根据id查询用户详情
+     * @param params
+     * @returns
+     */
     async getUserDetail(params) {
         return this.userRepository.findOne({ where: params });
     }
 
+    /**
+     * 根据id删除用户
+     * @param id
+     * @returns
+     */
     async deleteUser(id) {
         const userIds = id.toString().split(',');
         await this.userRepository.delete(userIds);
