@@ -5,6 +5,7 @@ import { User } from './user.entity';
 import { PaginationService } from '@/common/services/pagination.service';
 import { validate } from '@/utils/validation/validate';
 import { PhoneCodeRegisterDto, UsernameRegisterDto } from './user.dto';
+import { HashingService } from '@/common/services/hashing.service';
 
 @Injectable()
 export class UserService {
@@ -21,11 +22,12 @@ export class UserService {
     async createUser(params) {
         await validate(UsernameRegisterDto, params);
 
-        const { userName } = params || {};
-        const find = await this.userRepository.findOne({ where: { phoneNumber: userName } });
+        const { phoneNumber, password } = params || {};
+        const find = await this.userRepository.findOne({ where: { phoneNumber } });
         if (!find) {
-            // TODO:密码加解密
-            return this.userRepository.save(params);
+            const hashingService = new HashingService();
+            const hashedPassword = await hashingService.hash(password);
+            return this.userRepository.save({ ...params, password: hashedPassword });
         } else {
             throw new BadRequestException('该手机号已注册');
         }

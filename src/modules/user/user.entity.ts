@@ -15,7 +15,6 @@ export class User {
 
     @Column({ type: 'varchar', length: 18, comment: '身份证号', nullable: true })
     @Unique(['IDNumber'])
-    @Exclude() // IDNumber不返回给客户端
     IDNumber: string;
 
     @Column({ type: 'int', comment: '鉴权类型:1[手机验证码] 2[手机号+密码] 3[微信]', nullable: true })
@@ -26,6 +25,10 @@ export class User {
 
     @UpdateDateColumn({ comment: '更新时间' })
     updateTime: Date;
+
+    @Column({ type: 'varchar', comment: '密码' })
+    @Exclude()
+    password: string;
 
     // 将创建时间转成字符串返回
     @Expose({ name: 'createTime' })

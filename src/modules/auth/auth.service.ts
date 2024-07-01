@@ -10,6 +10,7 @@ import { Utils } from '@/utils/utils';
 import { JWT_CONSTANTS } from '@/constants';
 import { validate } from '@/utils/validation/validate';
 import { PhoneCodeLoginDto, UsernamePwdLoginDto } from './dto/auth.dto';
+import { HashingService } from '@/common/services/hashing.service';
 
 @Injectable()
 export class AuthService {
@@ -70,10 +71,18 @@ export class AuthService {
     async usernamePwdLogin(params) {
         await validate(UsernamePwdLoginDto, params);
 
-        const { phoneNumber } = params || {};
+        const { phoneNumber, password } = params || {};
         const find = await this.userRepository.findOne({ where: { phoneNumber } });
 
         if (!find) throw new UnauthorizedException('您的手机号未注册');
+
+        const hashingService = new HashingService();
+        const isEqual = hashingService.compare(password, find.password);
+        if (!isEqual) {
+            throw new UnauthorizedException('密码错误');
+        }
+
+        return this.generateTokens(find);
     }
 
     /**

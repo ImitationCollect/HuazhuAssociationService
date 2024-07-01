@@ -19,18 +19,15 @@ export class PhoneCodeRegisterDto extends CreateUserDto {
 }
 
 export class UsernameRegisterDto extends CreateUserDto {
-    @IsNotEmpty({ message: 'userName不能为空' })
+    @IsNotEmpty({ message: 'phoneNumber不能为空' })
     @IsString()
-    @Matches(PHONE_REG, { message: 'userName格式错误' })
-    userName: string;
+    @Matches(PHONE_REG, { message: 'phoneNumber格式错误' })
+    phoneNumber: string;
 
     @IsNotEmpty({ message: 'password不能为空' })
     @IsString()
     @Matches(PASSWORD_REG, { message: 'password格式错误' })
-    password: number;
-
-    @IsNotEmpty({ message: 'authType不能为空' })
-    authType: number = AUTH_TYPE_ENUM.USERNAME_PWD;
+    password: string;
 }
 
 export class EditUserDto {
