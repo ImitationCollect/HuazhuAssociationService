@@ -1,4 +1,5 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException } from '@nestjs/common';
+import { HttpStatus } from '@/constants';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -8,6 +9,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const request = ctx.getRequest();
 
         const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+        const code = exception instanceof HttpException ? exception['response']['status'] || status : HttpStatus.INTERNAL_SERVER_ERROR;
 
         // 设置错误信息
         const message = exception['message'] ? exception['message'] : `${status >= 500 ? 'Service Error' : 'Client Error'}`;
@@ -18,7 +20,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
         // 发送响应
         response.status(status).json({
-            code: status,
+            code: code,
             timestamp: new Date().getTime(),
             message: message,
             method: request.method,

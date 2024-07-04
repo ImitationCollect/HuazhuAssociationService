@@ -1,11 +1,11 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class BaseQueryDto {
-    @IsNotEmpty({ message: 'page不能为空' })
     @IsNumber()
+    @IsNotEmpty({ message: 'page不能为空' })
     page: number;
 
-    @IsNotEmpty({ message: 'pageSize不能为空' })
     @IsNumber()
+    @IsNotEmpty({ message: 'pageSize不能为空' })
     pageSize: number;
 }

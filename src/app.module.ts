@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import Services from './modules/index.service';
 import Controllers from './modules/index.controller';
 import Modules from './modules/index.module';
+import { RedisModule } from '@/common/modules/redis.module';
 
 // 根据不同的环境加载相应的配置文件
 let envFilePath = ['.env'];
@@ -56,7 +57,8 @@ switch (process.env.RUNNING_ENV) {
                     autoLoadEntities: true
                 };
             }
-        })
+        }),
+        RedisModule
     ],
     controllers: [AppController, ...Controllers],
     providers: [AppService, ...Services]

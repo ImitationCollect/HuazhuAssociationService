@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, Inject, UnprocessableEntityException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, BadRequestException, Inject, UnprocessableEntityException, UnauthorizedException, HttpException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user/user.entity';
@@ -11,6 +11,9 @@ import { JWT_CONSTANTS } from '@/constants';
 import { validate } from '@/utils/validation/validate';
 import { PhoneCodeLoginDto, UsernamePwdLoginDto } from './dto/auth.dto';
 import { HashingService } from '@/common/services/hashing.service';
+import { Redis } from 'ioredis';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import { HttpStatus, USER_PHONE_CODE_KEY, USER_LOGIN_TIME_KEY } from '@/constants';
 
 @Injectable()
 export class AuthService {
@@ -19,11 +22,14 @@ export class AuthService {
         private userRepository: Repository<User>,
         @Inject(CACHE_MANAGER)
         private cacheManager: Cache,
-        private readonly jwtService: JwtService
+        private readonly jwtService: JwtService,
+        @InjectRedis() private readonly redis: Redis
     ) {}
 
     async generateTokens(params) {
-        const token = await this.signToken({ userId: params.userId, phoneNumber: params.phoneNumber, userName: params.userName });
+        const loginTime = Utils.getTimeStamp(new Date());
+        const token = await this.signToken({ userId: params.userId, phoneNumber: params.phoneNumber, userName: params.userName, loginTime });
+        await this.redis.set(USER_LOGIN_TIME_KEY(params.userId), loginTime, 'EX', JWT_CONSTANTS.EXPIRESIN_NUMBER);
         return { access_token: token };
     }
 
@@ -38,7 +44,7 @@ export class AuthService {
                 ...payload
             },
             {
-                secret: JWT_CONSTANTS.SECRET,
+                secret: JWT_CONSTANTS.SECRET + payload.loginTime,
                 expiresIn: JWT_CONSTANTS.EXPIRESIN
             }
         );
@@ -58,8 +64,8 @@ export class AuthService {
         } else {
             const phoneCodeService = new PhoneCodeService();
             const code = await phoneCodeService.send(params.phoneNumber);
-            // cacheManager v5 ，过期时间是1分钟，单位是毫秒
-            await this.cacheManager.set(`${params.phoneNumber}-code`, code, 60000);
+            // redis过期时间是1分钟，单位是秒
+            await this.redis.set(USER_PHONE_CODE_KEY(find.userId), code, 'EX', 60);
             return code;
         }
     }
@@ -93,18 +99,29 @@ export class AuthService {
         await validate(PhoneCodeLoginDto, params);
 
         const { phoneNumber } = params || {};
-        const code = await this.cacheManager.get(`${phoneNumber}-code`);
         const find = await this.userRepository.findOne({ where: { phoneNumber } });
+        const code = await this.redis.get(USER_PHONE_CODE_KEY(find.userId));
+        const isExists = await this.redis.exists(USER_PHONE_CODE_KEY(find.userId));
 
         if (!find) throw new UnauthorizedException('您的手机号未注册');
 
-        if (Utils.isNull(code)) {
-            throw new BadRequestException('验证码已过期');
+        // if (!isExists) throw new HttpException({ status: HttpStatus.NO_PHONE_CODE_SENT, message: '未发送验证码' }, 200, {});
+
+        if (!isExists || Utils.isNull(code)) {
+            throw new BadRequestException('未发送验证码或验证码已过期');
         } else if (code == params.code) {
             // 登录成功，返回token
             return this.generateTokens(find);
         } else {
             throw new BadRequestException('验证码错误');
         }
+    }
+
+    /**退出登录
+     *
+     * @param params
+     */
+    async logout(params) {
+        return;
     }
 }

@@ -8,9 +8,8 @@ export class CreateUserDto {
     authType: number = AUTH_TYPE_ENUM.USERNAME_PWD;
 }
 export class PhoneCodeRegisterDto extends CreateUserDto {
-    @IsNotEmpty({ message: 'phoneNumber不能为空' })
-    @IsString()
     @Matches(PHONE_REG, { message: 'phoneNumber格式错误' })
+    @IsNotEmpty({ message: 'phoneNumber不能为空' })
     phoneNumber: string;
 
     @IsNotEmpty({ message: 'code不能为空' })
@@ -19,34 +18,30 @@ export class PhoneCodeRegisterDto extends CreateUserDto {
 }
 
 export class UsernameRegisterDto extends CreateUserDto {
-    @IsNotEmpty({ message: 'phoneNumber不能为空' })
-    @IsString()
     @Matches(PHONE_REG, { message: 'phoneNumber格式错误' })
+    @IsNotEmpty({ message: 'phoneNumber不能为空' })
     phoneNumber: string;
 
-    @IsNotEmpty({ message: 'password不能为空' })
-    @IsString()
     @Matches(PASSWORD_REG, { message: 'password格式错误' })
+    @IsNotEmpty({ message: 'password不能为空' })
     password: string;
 }
 
 export class EditUserDto {
-    @IsNotEmpty({ message: 'userId不能为空' })
     @IsNumber()
+    @IsNotEmpty({ message: 'userId不能为空' })
     userId: number;
 
-    @IsNotEmpty({ message: 'userName不能为空' })
     @IsString()
+    @IsNotEmpty({ message: 'userName不能为空' })
     userName: string;
 
-    @IsNotEmpty({ message: 'phoneNumber不能为空' })
-    @IsString()
     @Matches(PHONE_REG, { message: 'phoneNumber格式错误' })
+    @IsNotEmpty({ message: 'phoneNumber不能为空' })
     phoneNumber: string;
 
-    @IsNotEmpty({ message: 'IDNumber不能为空' })
-    @IsString()
     @Matches(ID_CARD_REG18, { message: 'IDNumber格式错误' })
+    @IsNotEmpty({ message: 'IDNumber不能为空' })
     IDNumber: string;
 }
 

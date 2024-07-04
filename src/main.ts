@@ -3,7 +3,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './utils/filters/all-exception.filter';
 import { TransformInterceptor } from './utils/interceptor/transform.interceptor';
-import { ValidationPipe, BadRequestException, HttpStatus, ClassSerializerInterceptor } from '@nestjs/common';
+import { ValidationPipe, BadRequestException, ClassSerializerInterceptor } from '@nestjs/common';
+import { HttpStatus } from '@/constants';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);

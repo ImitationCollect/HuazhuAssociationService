@@ -1,6 +1,7 @@
 export const JWT_CONSTANTS = {
-    SECRET: 'leeKey', // 密钥
-    EXPIRESIN: '86400s' // token有效时间 24h
+    SECRET: 'hzaServiceJWT', // 密钥
+    EXPIRESIN: '86400s', // token有效时间 24h
+    EXPIRESIN_NUMBER: 86400
 };
 
 // 1[手机验证码] 2[手机号+密码] 3[微信]

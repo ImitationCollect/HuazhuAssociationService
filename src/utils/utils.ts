@@ -13,6 +13,17 @@ export class Utils {
     }
 
     /**
+     * 获取时间戳
+     * @param value
+     * @param type [unix:秒，valueOf:毫秒]
+     * @returns
+     */
+    public static getTimeStamp(value, type = 'unix'): number {
+        if (this.isNull(value)) return;
+        return type === 'unix' ? moment(value).unix() : moment(value).valueOf();
+    }
+
+    /**
      * 判断对象是否为空
      * @param obj String | Array | Object
      * @returns {boolean}

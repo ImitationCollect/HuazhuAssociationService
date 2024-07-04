@@ -1,7 +1,7 @@
-import { Controller, Get, Param, Body, Post, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Param, Body, Post, Delete, Put, Req } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { PhoneCodeDto, LoginDto, PhoneCodeLoginDto } from './dto/auth.dto';
+import { PhoneCodeDto, LoginDto, LogoutDto } from './dto/auth.dto';
 import { AUTH_TYPE_ENUM } from '@/constants';
 import { Public } from '@/common/decorators/public.decorator';
 
@@ -30,5 +30,11 @@ export class AuthController {
             default:
                 return this.authService.usernamePwdLogin(loginDto);
         }
+    }
+
+    @Post('logout')
+    @ApiOperation({ summary: '退出登录' })
+    logout(@Body() logoutDto: LogoutDto) {
+        return this.authService.logout(logoutDto);
     }
 }
